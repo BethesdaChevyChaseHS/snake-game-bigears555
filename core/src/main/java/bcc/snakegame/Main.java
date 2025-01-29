@@ -76,13 +76,13 @@ public class Main extends InputAdapter implements ApplicationListener {
         if (gameOver) return false;
         // Update next direction based on arrow keys
         //need to make sure that it won't be doing a 180! For example, we can't go North if curDir is SOUTH
-        if (keycode == Keys.UP) {
+        if (keycode == Keys.UP && curDir != Direction.SOUTH) {
             nextDir = Direction.NORTH;
-        } else if (keycode == Keys.DOWN) {
+        } else if (keycode == Keys.DOWN && curDir != Direction.NORTH) {
             nextDir = Direction.SOUTH;
-        } else if (keycode == Keys.LEFT) {
+        } else if (keycode == Keys.LEFT && curDir != Direction.EAST) {
             nextDir = Direction.WEST;
-        } else if (keycode == Keys.RIGHT) {
+        } else if (keycode == Keys.RIGHT && curDir != Direction.WEST) {
             nextDir = Direction.EAST;
         }
         return true;
@@ -92,8 +92,13 @@ public class Main extends InputAdapter implements ApplicationListener {
     private void checkApple() {
         //check if the head of the snake is on the apple
         //if it is, increase score, and use your placeApple() method
-
-        snake.remove(0);//only run this code if there is NO APPLE - this deletes the last snake segment. 
+        if(snake.get(score).equals(apple)){
+            score++;
+            placeApple();
+        }
+        else{
+            snake.remove(0);//only run this code if there is NO APPLE - this deletes the last snake segment. 
+        }//only run this code if there is NO APPLE - this deletes the last snake segment. 
     }
     
 
@@ -101,19 +106,27 @@ public class Main extends InputAdapter implements ApplicationListener {
     //should return true if the position is located on the snake
     //useful for determining if we have a legal apple position
     private boolean onSnake(GridPosition pos) {
-
+        for(GridPosition section : snake){
+            if(pos.equals(section)){
+                return true;
+            }
+        }
         return false;
     }
 
     //checkpoint 2 - need to update apple position creation!
     private void placeApple() {
-        apple = new GridPosition(5,9);
+        GridPosition candidate = new GridPosition((int)(Math.random()*21),(int)(Math.random()*21));
+        while(onSnake(candidate)){
+            candidate = new GridPosition((int)Math.random()*21,(int)Math.random()*21);
+        }
+        apple = candidate;
         //You will need to use random numbers and a while loop to set the apple position.
         //generate candidate position
         //check that its not on the snake
         //if it is on the snake, try again
         //if not on the snake, set the apple position
-
+        
     }
     
     //checkpoint 2
@@ -121,9 +134,15 @@ public class Main extends InputAdapter implements ApplicationListener {
         //check if the head of the snake is an illegal position
 
         // Check out of bounds
-
+        if(snake.get(score).x>=GRID_SIZE||snake.get(score).y>=GRID_SIZE||snake.get(score).x<0||snake.get(score).y<0){
+            gameOver=true;
+        }
         // Check hitting itself
-
+        for(int i = 0; i<score; i++){
+            if(snake.get(score).equals(snake.get(i))){
+                gameOver=true;
+            }
+        }
         // set gameOver to true if we die
     }
 
